@@ -51,12 +51,13 @@
         #fullscreenImage {
             display: none;
             position: fixed;
-            top: 5%;
-            left: 5%;
-            width: 90%;
-            height: 90%;
-            background-size: cover;
-            background-position: center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain; /* Görseli ekrana sığdır */
+            background-repeat: no-repeat; /* Tekrarlanmasın */
+            background-position: center; /* Ortaya hizala */
             z-index: 999;
             background-color: black;
         }
@@ -64,6 +65,22 @@
             position: absolute;
             top: 50%;
             right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            font-size: 24px;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            border-radius: 50%;
+            z-index: 1000;
+            display: none;
+        }
+        #prevButton {
+            position: absolute;
+            top: 50%;
+            left: 20px;
             width: 50px;
             height: 50px;
             background-color: rgba(255, 255, 255, 0.8);
@@ -88,12 +105,11 @@
                 width: 96%;
                 height: 70%;
             }
-            #nextButton {
+            #nextButton, #prevButton {
                 width: 40px;
                 height: 40px;
                 font-size: 20px;
                 line-height: 40px;
-                right: 10px;
             }
             h1 {
                 font-size: 18px;
@@ -106,12 +122,11 @@
                 width: 100%;
                 height: 60%;
             }
-            #nextButton {
+            #nextButton, #prevButton {
                 width: 30px;
                 height: 30px;
                 font-size: 16px;
                 line-height: 30px;
-                right: 5px;
             }
             h1 {
                 font-size: 16px;
@@ -141,6 +156,7 @@
 
 <div id="fullscreenImage"></div>
 <div id="nextButton" onclick="showNextImage()">&#8594;</div>
+<div id="prevButton" onclick="showPrevImage()">&#8592;</div>
 
 <audio id="successSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
 <audio id="errorSound" src="https://www.soundjay.com/button/beep-10.wav"></audio>
@@ -217,12 +233,21 @@
         fullscreenImage.style.backgroundImage = `url(${images[currentImageIndex]})`;
         fullscreenImage.style.display = "block";
         document.getElementById("nextButton").style.display = "block";
+        document.getElementById("prevButton").style.display = "block";
     }
 
     function showNextImage() {
         currentImageIndex++;
         if (currentImageIndex >= images.length) {
             currentImageIndex = 0;
+        }
+        document.getElementById("fullscreenImage").style.backgroundImage = `url(${images[currentImageIndex]})`;
+    }
+
+    function showPrevImage() {
+        currentImageIndex--;
+        if (currentImageIndex < 0) {
+            currentImageIndex = images.length - 1;
         }
         document.getElementById("fullscreenImage").style.backgroundImage = `url(${images[currentImageIndex]})`;
     }
