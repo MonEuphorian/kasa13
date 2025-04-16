@@ -1,258 +1,470 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Kasa Şifre Girişi</title>
-    <style>
-        body {
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
-            overflow: hidden;
-        }
-        #safe {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-            background-image: url('https://c7.alamy.com/comp/W13H30/steel-safe-with-login-and-password-screen-3d-illustration-W13H30.jpg');
-            background-size: cover;
-            position: relative;
-        }
-        #indicator {
-            width: 50px;
-            height: 50px;
-            background-color: grey;
-            border-radius: 50%;
-            position: absolute;
-            top: 50px;
-            left: 77px;
-        }
-        #message {
-            margin-top: 20px;
-            font-size: 24px;
-            color: green;
-            display: none;
-        }
-        #inputArea {
-            margin-top: 20px;
-        }
-        #inputArea input {
-            font-size: 24px;
-            width: 150px;
-            text-align: center;
-        }
-        #lockMessage {
-            margin-top: 20px;
-            font-size: 18px;
-            color: red;
-            display: none;
-        }
-        #fullscreenImage {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: contain; /* Görseli ekrana sığdır */
-            background-repeat: no-repeat; /* Tekrarlanmasın */
-            background-position: center; /* Ortaya hizala */
-            z-index: 999;
-            background-color: black;
-        }
-        #nextButton {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: black;
-            font-size: 24px;
-            text-align: center;
-            line-height: 50px;
-            cursor: pointer;
-            border-radius: 50%;
-            z-index: 1000;
-            display: none;
-        }
-        #prevButton {
-            position: absolute;
-            top: 50%;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: black;
-            font-size: 24px;
-            text-align: center;
-            line-height: 50px;
-            cursor: pointer;
-            border-radius: 50%;
-            z-index: 1000;
-            display: none;
-        }
-        #timer {
-            font-size: 20px;
-            color: blue;
-            margin-top: 10px;
-        }
-        @media (max-width: 768px) {
-            #fullscreenImage {
-                top: 2%;
-                left: 2%;
-                width: 96%;
-                height: 70%;
-            }
-            #nextButton, #prevButton {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-                line-height: 40px;
-            }
-            h1 {
-                font-size: 18px;
-            }
-        }
-        @media (max-width: 480px) {
-            #fullscreenImage {
-                top: 5%;
-                left: 0;
-                width: 100%;
-                height: 60%;
-            }
-            #nextButton, #prevButton {
-                width: 30px;
-                height: 30px;
-                font-size: 16px;
-                line-height: 30px;
-            }
-            h1 {
-                font-size: 16px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safe Unlocking Simulation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a1a;
+      color: #fff;
+    }
+
+    .safe-container {
+      position: relative;
+      width: 90%;
+      max-width: 400px;
+      perspective: 1000px;
+    }
+
+    .safe {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: #2a2a2a;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      transform-style: preserve-3d;
+      transition: transform 1s ease-in-out;
+    }
+
+    .safe.open {
+      transform: rotateY(-90deg);
+    }
+
+    .safe-door {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #333;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .safe-content {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #2a2a2a;
+      border-radius: 20px;
+      padding: 20px;
+      transform: rotateY(90deg);
+      display: none;
+    }
+
+    .safe.open .safe-content {
+      display: block;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 20px;
+    }
+
+    .key {
+      background: #444;
+      border: none;
+      padding: 20px;
+      font-size: 24px;
+      color: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .key:hover {
+      background: #555;
+    }
+
+    .display {
+      background: #000;
+      color: #0f0;
+      padding: 20px;
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+      font-size: 24px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      word-wrap: break-word;
+    }
+
+    .image-gallery {
+      display: flex;
+      overflow-x: hidden;
+      width: 100%;
+      height: 300px;
+      position: relative;
+    }
+
+    .image-container {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      cursor: pointer; /* Tıklanabilir */
+    }
+
+    .image-container.active img {
+      opacity: 1;
+    }
+
+    .error {
+      animation: shake 0.5s ease-in-out;
+      background: #ff4444 !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .countdown {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+    }
+
+    .countdown.active {
+      display: block;
+    }
+
+    .nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 15px;
+      cursor: pointer;
+      border-radius: 50%;
+      z-index: 10;
+      transition: background 0.3s;
+      display: none;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-button.prev {
+      left: 10px;
+    }
+
+    .nav-button.next {
+      right: 10px;
+    }
+
+    .safe.open .nav-button {
+      display: block;
+    }
+
+    /* Lightbox stili */
+    .fullscreen-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .fullscreen-container.active {
+      display: flex;
+    }
+
+    .fullscreen-container img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border: 2px solid #fff;
+    }
+
+    @media (max-width: 480px) {
+      .safe-container {
+        width: 95%;
+      }
+      .key {
+        padding: 15px;
+        font-size: 20px;
+      }
+      .display {
+        font-size: 20px;
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="safe-container">
+    <div class="safe">
+      <div class="safe-door">
+        <div class="display">Enter Code</div>
+        <div class="keypad">
+          <button class="key">1</button>
+          <button class="key">2</button>
+          <button class="key">3</button>
+          <button class="key">4</button>
+          <button class="key">5</button>
+          <button class="key">6</button>
+          <button class="key">7</button>
+          <button class="key">8</button>
+          <button class="key">9</button>
+          <button class="key">0</button>
+          <button class="key">Clear</button>
+          <button class="key">Enter</button>
+        </div>
+      </div>
+      <div class="safe-content">
+        <div class="image-gallery">
+          <button class="nav-button prev">←</button>
+          <button class="nav-button next">→</button>
+          <!-- 1. Resim -->
+          <div class="image-container active">
+            <img src="https://github.com/MonEuphorian/kasa/blob/main/n1.jpg?raw=true" alt="Safe Content 1">
+          </div>
+          <!-- 2. Resim -->
+          <div class="image-container">
+            <img src="https://github.com/MonEuphorian/kasa/blob/main/n2.jpg?raw=true" alt="Safe Content 2">
+          </div>
+          <!-- 3. Resim -->
+          <div class="image-container">
+            <img src="https://github.com/MonEuphorian/kasa/blob/main/y1.jpg?raw=true" alt="Safe Content 3">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="countdown">
+    <h2>Kasa Kilitli</h2>
+    <p>5 dakika sonra tekrar deneyebilirsiniz. Kalan Süre: <span id="timer">5:00</span></p>
+  </div>
 
-<h1>Online Şifre Girişi</h1>
+  <!-- Lightbox görüntüsü -->
+  <div class="fullscreen-container" id="fullscreenContainer">
+    <img id="fullscreenImage" src="" alt="Fullscreen View">
+  </div>
 
-<div id="safe">
-    <div id="indicator"></div>
-</div>
+  <script>
+    // Ses efektleri tanımları:
+    const lockSound = new Audio("1128.wav");   // 3 yanlış denemeden sonra kilitlenme sesi
+    const openSound = new Audio("1127.wav");   // Kasa açılınca çalacak ses
+    const errorSound = new Audio("1129.wav");  // Hatalı şifre girince ses
 
-<div id="message">Kilit açıldı</div>
+    // Şifrenin Base64 ile şifrelenmiş hali: "6161" -> "NjE2MQ=="
+    const encodedCode = "NjE2MQ==";
+    const correctCode = atob(encodedCode);
 
-<div id="inputArea">
-    <input type="password" id="codeInput" maxlength="4" placeholder="Şifre">
-    <br><br>
-    <button onclick="checkCode()">Giriş</button>
-</div>
-
-<div id="lockMessage">
-    Kasa kilitlendi. Lütfen <span id="timer">5:00</span> dakika bekleyin.
-</div>
-
-<div id="fullscreenImage"></div>
-<div id="nextButton" onclick="showNextImage()">&#8594;</div>
-<div id="prevButton" onclick="showPrevImage()">&#8592;</div>
-
-<audio id="successSound" src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/1127.WAV"></audio>
-<audio id="errorSound" src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/1128.WAV"></audio>
-<audio id="lockSound" src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/1129.WAV"></audio>
-
-
-<script>
-    let correctCode = "6161";
-    let attemptCount = 0;
+    let currentInput = '';
+    let attempts = 3;
     let isLocked = false;
-    let timerElement = document.getElementById("timer");
-    let lockDuration = 300; // 5 dakika = 300 saniye
-    const images = [
-        'https://raw.githubusercontent.com/MonEuphorian/kasa/main/n1.jpg',
-        'https://raw.githubusercontent.com/MonEuphorian/kasa/main/n2.jpg',
-        'https://raw.githubusercontent.com/MonEuphorian/kasa/main/y1.jpg'
-    ];
+    let lockEndTime = null;
     let currentImageIndex = 0;
+    const images = document.querySelectorAll('.image-container');
+    const display = document.querySelector('.display');
+    const safe = document.querySelector('.safe');
+    const countdown = document.querySelector('.countdown');
+    const timerDisplay = document.getElementById('timer');
 
-    function checkCode() {
-        if (isLocked) return;
-        
-        let inputCode = document.getElementById("codeInput").value;
-        let indicator = document.getElementById("indicator");
-        let successSound = document.getElementById("successSound");
-        let errorSound = document.getElementById("errorSound");
-        
-        if (inputCode === correctCode) {
-            indicator.style.backgroundColor = "green";
-            document.getElementById("message").style.display = "block";
-            document.getElementById("inputArea").style.display = "none";
-            successSound.play();
-            showFullScreenImage();
-        } else {
-            attemptCount++;
-            indicator.style.backgroundColor = "red";
-            errorSound.play();
-            if (attemptCount >= 3) {
-                lockSafe();
-            }
-        }
-        document.getElementById("codeInput").value = "";
+    // Lightbox öğeleri
+    const fullscreenContainer = document.getElementById('fullscreenContainer');
+    const fullscreenImage = document.getElementById('fullscreenImage');
+
+    function updateDisplay() {
+      if (attempts < 3) {
+        display.innerHTML = currentInput 
+          ? `${currentInput}<br>Kalan Hak: ${attempts}`
+          : `Enter Code<br>Kalan Hak: ${attempts}`;
+      } else {
+        display.innerHTML = currentInput || 'Enter Code';
+      }
+    }
+
+    function showError() {
+      display.classList.add('error');
+      errorSound.play();
+      setTimeout(() => display.classList.remove('error'), 500);
     }
 
     function lockSafe() {
-        isLocked = true;
-        document.getElementById("lockMessage").style.display = "block";
-        document.getElementById("inputArea").style.display = "none";
-        document.getElementById("indicator").style.backgroundColor = "black";
-        document.getElementById("lockSound").play();
-        
-        let timer = lockDuration;
-        const countdown = setInterval(function() {
-            const minutes = Math.floor(timer / 60);
-            const seconds = timer % 60;
-            timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            timer--;
-            if (timer < 0) {
-                clearInterval(countdown);
-                unlockSafe();
-            }
-        }, 1000);
+      isLocked = true;
+      lockEndTime = Date.now() + (5 * 60 * 1000); // 5 dakika kilitli
+      // Kilitlenme sesini çal
+      lockSound.play();
+      countdown.classList.add('active');
+      updateTimer();
     }
 
-    function unlockSafe() {
+    function updateTimer() {
+      if (!isLocked) return;
+      
+      const remaining = Math.ceil((lockEndTime - Date.now()) / 1000);
+      if (remaining <= 0) {
         isLocked = false;
-        attemptCount = 0;
-        document.getElementById("lockMessage").style.display = "none";
-        document.getElementById("inputArea").style.display = "block";
-        document.getElementById("indicator").style.backgroundColor = "grey";
+        attempts = 3;
+        countdown.classList.remove('active');
+        display.textContent = 'Enter Code';
+        return;
+      }
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      setTimeout(updateTimer, 1000);
     }
 
-    function showFullScreenImage() {
-        const fullscreenImage = document.getElementById("fullscreenImage");
-        fullscreenImage.style.backgroundImage = `url(${images[currentImageIndex]})`;
-        fullscreenImage.style.display = "block";
-        document.getElementById("nextButton").style.display = "block";
-        document.getElementById("prevButton").style.display = "block";
-    }
-
-    function showNextImage() {
-        currentImageIndex++;
-        if (currentImageIndex >= images.length) {
-            currentImageIndex = 0;
+    function checkCode() {
+      if (currentInput === correctCode) {
+        openSound.play();
+        safe.classList.add('open');
+        // 1 saniye sonra ilk resmin görünürlüğünü sağlayalım
+        setTimeout(() => {
+          images[0].querySelector('img').style.opacity = '1';
+        }, 1000);
+      } else {
+        attempts--;
+        showError();
+        display.innerHTML = `Yanlış!<br>Kalan Hak: ${attempts}`;
+        if (attempts <= 0) {
+          lockSafe();
         }
-        document.getElementById("fullscreenImage").style.backgroundImage = `url(${images[currentImageIndex]})`;
+      }
+      currentInput = '';
     }
 
-    function showPrevImage() {
+    function handleKeyPress(key) {
+      if (isLocked) return;
+      const keyValue = key.trim();
+      if (keyValue === 'Clear') {
+        currentInput = '';
+      } else if (keyValue === 'Enter') {
+        if (currentInput.length === 4) {
+          checkCode();
+        }
+      } else if (currentInput.length < 4 && !isNaN(keyValue)) {
+        currentInput += keyValue;
+      }
+      updateDisplay();
+    }
+
+    // Dokunmatik kaydırma (swipe) için
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.querySelector('.image-gallery').addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    document.querySelector('.image-gallery').addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0 && currentImageIndex < images.length - 1) {
+          // Sola kaydırma
+          images[currentImageIndex].classList.remove('active');
+          images[currentImageIndex].querySelector('img').style.opacity = '0';
+          currentImageIndex++;
+          images[currentImageIndex].classList.add('active');
+          images[currentImageIndex].querySelector('img').style.opacity = '1';
+        } else if (diff < 0 && currentImageIndex > 0) {
+          // Sağa kaydırma
+          images[currentImageIndex].classList.remove('active');
+          images[currentImageIndex].querySelector('img').style.opacity = '0';
+          currentImageIndex--;
+          images[currentImageIndex].classList.add('active');
+          images[currentImageIndex].querySelector('img').style.opacity = '1';
+        }
+      }
+    }
+
+    // Keypad butonları
+    document.querySelectorAll('.key').forEach(key => {
+      key.addEventListener('click', () => handleKeyPress(key.textContent));
+    });
+
+    // Önceki/Sonraki navigasyon butonları
+    document.querySelector('.nav-button.prev').addEventListener('click', () => {
+      if (currentImageIndex > 0) {
+        images[currentImageIndex].classList.remove('active');
+        images[currentImageIndex].querySelector('img').style.opacity = '0';
         currentImageIndex--;
-        if (currentImageIndex < 0) {
-            currentImageIndex = images.length - 1;
-        }
-        document.getElementById("fullscreenImage").style.backgroundImage = `url(${images[currentImageIndex]})`;
-    }
-</script>
+        images[currentImageIndex].classList.add('active');
+        images[currentImageIndex].querySelector('img').style.opacity = '1';
+      }
+    });
+    document.querySelector('.nav-button.next').addEventListener('click', () => {
+      if (currentImageIndex < images.length - 1) {
+        images[currentImageIndex].classList.remove('active');
+        images[currentImageIndex].querySelector('img').style.opacity = '0';
+        currentImageIndex++;
+        images[currentImageIndex].classList.add('active');
+        images[currentImageIndex].querySelector('img').style.opacity = '1';
+      }
+    });
 
+    // Resme tıklanınca tam ekran (lightbox) açılması
+    images.forEach(container => {
+      const imgElement = container.querySelector('img');
+      imgElement.addEventListener('click', () => {
+        fullscreenImage.src = imgElement.src;
+        fullscreenContainer.classList.add('active');
+      });
+    });
+
+    // Lightbox kapatma
+    fullscreenContainer.addEventListener('click', () => {
+      fullscreenContainer.classList.remove('active');
+      fullscreenImage.src = '';
+    });
+
+    function gameLoop() {
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.onload = () => {
+      gameLoop();
+    };
+  </script>
 </body>
 </html>
