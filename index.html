@@ -110,7 +110,7 @@
       height: 100%;
       opacity: 0;
       transition: opacity 0.5s ease-in-out;
-      pointer-events: none; /* aktif olmayanların tıklanmasını engelle */
+      pointer-events: none;
     }
     .image-container.active {
       opacity: 1;
@@ -233,15 +233,12 @@
         <div class="image-gallery">
           <button class="nav-button prev">←</button>
           <button class="nav-button next">→</button>
-          <!-- 1. Resim -->
           <div class="image-container active">
             <img src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/n1.jpg" alt="Safe Content 1">
           </div>
-          <!-- 2. Resim -->
           <div class="image-container">
             <img src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/n2.jpg" alt="Safe Content 2">
           </div>
-          <!-- 3. Resim -->
           <div class="image-container">
             <img src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/y1.jpg" alt="Safe Content 3">
           </div>
@@ -249,11 +246,17 @@
       </div>
     </div>
   </div>
+
+  <!-- Ses efektleri -->
+  <audio id="openSound" src="1127.wav" preload="auto"></audio>
+  <audio id="lockSound" src="1128.wav" preload="auto"></audio>
+  <audio id="errorSound" src="1129.wav" preload="auto"></audio>
+
   <div class="countdown">
     <h2>Kasa Kilitli</h2>
     <p>5 dakika sonra tekrar deneyebilirsiniz. Kalan Süre: <span id="timer">5:00</span></p>
   </div>
-  <!-- Tam ekran (lightbox) görünümü -->
+
   <div class="fullscreen-container" id="fullscreenContainer">
     <img id="fullscreenImage" src="" alt="Fullscreen View">
   </div>
@@ -268,7 +271,7 @@
     let isLocked = false;
     let lockEndTime = null;
     let currentImageIndex = 0;
-    
+
     const images = document.querySelectorAll('.image-container');
     const display = document.querySelector('.display');
     const safe = document.querySelector('.safe');
@@ -276,6 +279,11 @@
     const timerDisplay = document.getElementById('timer');
     const fullscreenContainer = document.getElementById('fullscreenContainer');
     const fullscreenImage = document.getElementById('fullscreenImage');
+
+    // Ses elementleri
+    const openSound = document.getElementById('openSound');
+    const lockSound = document.getElementById('lockSound');
+    const errorSound = document.getElementById('errorSound');
 
     function updateDisplay() {
       if (attempts < 3) {
@@ -289,21 +297,22 @@
 
     function showError() {
       display.classList.add('error');
+      errorSound.currentTime = 0;
+      errorSound.play();
       setTimeout(() => display.classList.remove('error'), 500);
-      // Hatalı şifre sesi (1129.wav) çalınabilir.
     }
 
     function lockSafe() {
       isLocked = true;
       lockEndTime = Date.now() + (5 * 60 * 1000);
       countdown.classList.add('active');
-      // Kilitlenme sesi (1128.wav) çalınabilir.
+      lockSound.currentTime = 0;
+      lockSound.play();
       updateTimer();
     }
 
     function updateTimer() {
       if (!isLocked) return;
-      
       const remaining = Math.ceil((lockEndTime - Date.now()) / 1000);
       if (remaining <= 0) {
         isLocked = false;
@@ -321,7 +330,8 @@
     function checkCode() {
       if (currentInput === correctCode) {
         safe.classList.add('open');
-        // Kasa açılma sesi (1127.wav) çalınabilir.
+        openSound.currentTime = 0;
+        openSound.play();
         setTimeout(() => {
           showImage(0);
         }, 1000);
@@ -338,13 +348,10 @@
 
     function handleKeyPress(key) {
       if (isLocked) return;
-      
       if (key === 'Clear') {
         currentInput = '';
       } else if (key === 'Enter') {
-        if (currentInput.length === 4) {
-          checkCode();
-        }
+        if (currentInput.length === 4) checkCode();
       } else if (currentInput.length < 4 && !isNaN(key)) {
         currentInput += key;
       }
@@ -357,54 +364,36 @@
       images[currentImageIndex].classList.add('active');
     }
 
-    // Dokunmatik swipe işlemleri
-    let touchStartX = 0, touchEndX = 0;
+    // Dokunmatik swipe
+    let touchStartX=0, touchEndX=0;
     document.querySelector('.image-gallery').addEventListener('touchstart', e => {
       touchStartX = e.changedTouches[0].screenX;
     });
     document.querySelector('.image-gallery').addEventListener('touchend', e => {
       touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    });
-    function handleSwipe() {
-      const swipeThreshold = 50;
       const diff = touchStartX - touchEndX;
-      if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0 && currentImageIndex < images.length - 1) {
-          showImage(currentImageIndex + 1);
-        } else if (diff < 0 && currentImageIndex > 0) {
-          showImage(currentImageIndex - 1);
-        }
+      if (Math.abs(diff) > 50) {
+        if (diff > 0 && currentImageIndex < images.length-1) showImage(currentImageIndex+1);
+        else if (diff < 0 && currentImageIndex > 0) showImage(currentImageIndex-1);
       }
-    }
+    });
 
-    // Keypad butonları
     document.querySelectorAll('.key').forEach(key => {
       key.addEventListener('click', () => handleKeyPress(key.textContent));
     });
-
-    // Önceki ve Sonraki butonları
     document.querySelector('.nav-button.prev').addEventListener('click', () => {
-      if (currentImageIndex > 0) {
-        showImage(currentImageIndex - 1);
-      }
+      if (currentImageIndex>0) showImage(currentImageIndex-1);
     });
     document.querySelector('.nav-button.next').addEventListener('click', () => {
-      if (currentImageIndex < images.length - 1) {
-        showImage(currentImageIndex + 1);
-      }
+      if (currentImageIndex<images.length-1) showImage(currentImageIndex+1);
     });
-
-    // Resme tıklayınca tam ekran (lightbox) açma
     images.forEach(container => {
-      const imgElement = container.querySelector('img');
-      imgElement.addEventListener('click', () => {
-        fullscreenImage.src = imgElement.src;
+      const img = container.querySelector('img');
+      img.addEventListener('click', () => {
+        fullscreenImage.src = img.src;
         fullscreenContainer.classList.add('active');
       });
     });
-
-    // Tam ekran (lightbox) kapatma
     fullscreenContainer.addEventListener('click', () => {
       fullscreenContainer.classList.remove('active');
       fullscreenImage.src = '';
