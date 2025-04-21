@@ -2,210 +2,207 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Mobile zoom devre dışı -->
+  <meta name="viewport"
+        content="width=device-width,
+                 initial-scale=1,
+                 maximum-scale=1,
+                 user-scalable=no">
   <title>Safe Unlocking Simulation</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
     }
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #1a1a1a;
-      color: #fff;
+
+    /* Zoom & jestler kapalı */
+    html,body{touch-action:manipulation;}
+
+    body{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      background:#1a1a1a;
+      color:#fff;
     }
-    .safe-container {
-      position: relative;
-      width: 90%;
-      max-width: 400px;
-      perspective: 1000px;
+
+    .safe-container{
+      position:relative;
+      width:90%;
+      max-width:400px;
+      perspective:1000px;
     }
-    .safe {
-      position: relative;
-      width: 100%;
-      height: 500px;
-      background: #2a2a2a;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      transform-style: preserve-3d;
-      transition: transform 1s ease-in-out;
+
+    .safe{
+      position:relative;
+      width:100%;
+      height:500px;
+      background:#2a2a2a;
+      border-radius:20px;
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
+      transform-style:preserve-3d;
+      transition:transform 1s ease-in-out;
     }
-    .safe.open {
-      transform: rotateY(-90deg);
+    .safe.open{transform:rotateY(-90deg);}
+
+    .safe-door{
+      position:absolute;
+      width:100%;
+      height:100%;
+      background:#333;
+      border-radius:20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:20px;
     }
-    .safe-door {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #333;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+
+    .safe-content{
+      position:absolute;
+      width:100%;
+      height:100%;
+      background:#2a2a2a;
+      border-radius:20px;
+      padding:20px;
+      transform:rotateY(90deg);
+      display:none;
     }
-    .safe-content {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #2a2a2a;
-      border-radius: 20px;
-      padding: 20px;
-      transform: rotateY(90deg);
-      display: none;
+    .safe.open .safe-content{display:block;}
+
+    .keypad{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      width:100%;
+      max-width:300px;
+      margin-top:20px;
     }
-    .safe.open .safe-content {
-      display: block;
+
+    .key{
+      background:#444;
+      border:none;
+      padding:20px;
+      font-size:24px;
+      color:#fff;
+      border-radius:10px;
+      cursor:pointer;
+      transition:background 0.3s;
+
+      /* Çift‑tap zoom’u engelle */
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
     }
-    .keypad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      width: 100%;
-      max-width: 300px;
-      margin-top: 20px;
+    .key:hover{background:#555;}
+
+    .display{
+      background:#000;
+      color:#0f0;
+      padding:20px;
+      width:100%;
+      max-width:300px;
+      text-align:center;
+      font-size:24px;
+      border-radius:10px;
+      margin-bottom:20px;
+      word-wrap:break-word;
+      user-select:none;
     }
-    .key {
-      background: #444;
-      border: none;
-      padding: 20px;
-      font-size: 24px;
-      color: #fff;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .key:hover {
-      background: #555;
-    }
-    .display {
-      background: #000;
-      color: #0f0;
-      padding: 20px;
-      width: 100%;
-      max-width: 300px;
-      text-align: center;
-      font-size: 24px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      word-wrap: break-word;
-    }
+
     /* Basitleştirilmiş resim galerisi */
-    .image-gallery {
-      position: relative;
-      width: 100%;
-      height: 300px;
-      overflow: hidden;
+    .image-gallery{
+      position:relative;
+      width:100%;
+      height:300px;
+      overflow:hidden;
     }
-    .image-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
-      pointer-events: none;
+    .image-container{
+      position:absolute;
+      top:0;left:0;
+      width:100%;height:100%;
+      opacity:0;
+      transition:opacity 0.5s ease-in-out;
+      pointer-events:none;
     }
-    .image-container.active {
-      opacity: 1;
-      pointer-events: auto;
+    .image-container.active{
+      opacity:1;
+      pointer-events:auto;
     }
-    .image-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      cursor: pointer;
+    .image-container img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      cursor:pointer;
     }
+
     /* Hata (shake) animasyonu */
-    .error {
-      animation: shake 0.5s ease-in-out;
-      background: #ff4444 !important;
+    .error{
+      animation:shake 0.5s ease-in-out;
+      background:#ff4444 !important;
     }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
+    @keyframes shake{
+      0%,100%{transform:translateX(0);}
+      25%{transform:translateX(-10px);}
+      75%{transform:translateX(10px);}
     }
-    .countdown {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.9);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      display: none;
+
+    .countdown{
+      position:fixed;
+      top:50%;left:50%;
+      transform:translate(-50%,-50%);
+      background:rgba(0,0,0,0.9);
+      padding:20px;
+      border-radius:10px;
+      text-align:center;
+      display:none;
     }
-    .countdown.active {
-      display: block;
+    .countdown.active{display:block;}
+
+    .nav-button{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      background:rgba(255,255,255,0.2);
+      border:none;
+      color:#fff;
+      padding:15px;
+      cursor:pointer;
+      border-radius:50%;
+      z-index:10;
+      transition:background 0.3s;
+      display:none;
     }
-    .nav-button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      color: white;
-      padding: 15px;
-      cursor: pointer;
-      border-radius: 50%;
-      z-index: 10;
-      transition: background 0.3s;
-      display: none;
+    .nav-button:hover{background:rgba(255,255,255,0.3);}
+    .nav-button.prev{left:10px;}
+    .nav-button.next{right:10px;}
+    .safe.open .nav-button{display:block;}
+
+    /* Tam ekran (lightbox) */
+    .fullscreen-container{
+      display:none;
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:rgba(0,0,0,0.8);
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
     }
-    .nav-button:hover {
-      background: rgba(255, 255, 255, 0.3);
+    .fullscreen-container.active{display:flex;}
+    .fullscreen-container img{
+      max-width:90%;
+      max-height:90%;
+      object-fit:contain;
+      border:2px solid #fff;
     }
-    .nav-button.prev {
-      left: 10px;
-    }
-    .nav-button.next {
-      right: 10px;
-    }
-    .safe.open .nav-button {
-      display: block;
-    }
-    /* Tam ekran (lightbox) görünümü */
-    .fullscreen-container {
-      display: none;
-      position: fixed;
-      top: 0; 
-      left: 0;
-      width: 100%; 
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    .fullscreen-container.active {
-      display: flex;
-    }
-    .fullscreen-container img {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      border: 2px solid #fff;
-    }
-    @media (max-width: 480px) {
-      .safe-container {
-        width: 95%;
-      }
-      .key {
-        padding: 15px;
-        font-size: 20px;
-      }
-      .display {
-        font-size: 20px;
-        padding: 15px;
-      }
+
+    @media(max-width:480px){
+      .safe-container{width:95%;}
+      .key{padding:15px;font-size:20px;}
+      .display{font-size:20px;padding:15px;}
     }
   </style>
 </head>
@@ -229,10 +226,12 @@
           <button class="key">Enter</button>
         </div>
       </div>
+
       <div class="safe-content">
         <div class="image-gallery">
           <button class="nav-button prev">←</button>
           <button class="nav-button next">→</button>
+
           <div class="image-container active">
             <img src="https://raw.githubusercontent.com/MonEuphorian/kasa13/main/n1.jpg" alt="Safe Content 1">
           </div>
@@ -262,7 +261,7 @@
   </div>
 
   <script>
-    // Şifrenin Base64 ile şifrelenmiş hali: "6161" -> "NjE2MQ=="
+    // Şifrenin Base64 kodlu hâli: "6161" → "NjE2MQ=="
     const encodedCode = "NjE2MQ==";
     const correctCode = atob(encodedCode);
 
@@ -280,124 +279,133 @@
     const fullscreenContainer = document.getElementById('fullscreenContainer');
     const fullscreenImage = document.getElementById('fullscreenImage');
 
-    // Ses elementleri
+    // Sesler
     const openSound = document.getElementById('openSound');
     const lockSound = document.getElementById('lockSound');
     const errorSound = document.getElementById('errorSound');
 
-    function updateDisplay() {
-      if (attempts < 3) {
-        display.innerHTML = currentInput 
-          ? `${currentInput}<br>Kalan Hak: ${attempts}` 
+    function updateDisplay(){
+      if(attempts < 3){
+        display.innerHTML = currentInput
+          ? `${currentInput}<br>Kalan Hak: ${attempts}`
           : `Enter Code<br>Kalan Hak: ${attempts}`;
-      } else {
+      }else{
         display.innerHTML = currentInput || 'Enter Code';
       }
     }
 
-    function showError() {
+    function showError(){
       display.classList.add('error');
       errorSound.currentTime = 0;
       errorSound.play();
-      setTimeout(() => display.classList.remove('error'), 500);
+      setTimeout(()=>display.classList.remove('error'),500);
     }
 
-    function lockSafe() {
+    function lockSafe(){
       isLocked = true;
-      lockEndTime = Date.now() + (5 * 60 * 1000);
+      lockEndTime = Date.now() + 5*60*1000; // 5 dk
       countdown.classList.add('active');
       lockSound.currentTime = 0;
       lockSound.play();
       updateTimer();
     }
 
-    function updateTimer() {
-      if (!isLocked) return;
-      const remaining = Math.ceil((lockEndTime - Date.now()) / 1000);
-      if (remaining <= 0) {
+    function updateTimer(){
+      if(!isLocked) return;
+      const remaining = Math.ceil((lockEndTime - Date.now())/1000);
+      if(remaining <= 0){
         isLocked = false;
         attempts = 3;
         countdown.classList.remove('active');
         display.textContent = 'Enter Code';
         return;
       }
-      const minutes = Math.floor(remaining / 60);
+      const minutes = Math.floor(remaining/60);
       const seconds = remaining % 60;
-      timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-      setTimeout(updateTimer, 1000);
+      timerDisplay.textContent =
+        `${minutes}:${seconds.toString().padStart(2,'0')}`;
+      setTimeout(updateTimer,1000);
     }
 
-    function checkCode() {
-      if (currentInput === correctCode) {
+    function checkCode(){
+      if(currentInput === correctCode){
         safe.classList.add('open');
         openSound.currentTime = 0;
         openSound.play();
-        setTimeout(() => {
-          showImage(0);
-        }, 1000);
-      } else {
+        setTimeout(()=>showImage(0),1000);
+      }else{
         attempts--;
         showError();
         display.innerHTML = `Yanlış!<br>Kalan Hak: ${attempts}`;
-        if (attempts <= 0) {
-          lockSafe();
-        }
+        if(attempts <= 0) lockSafe();
       }
       currentInput = '';
     }
 
-    function handleKeyPress(key) {
-      if (isLocked) return;
-      if (key === 'Clear') {
+    function handleKeyPress(key){
+      if(isLocked) return;
+      if(key === 'Clear'){
         currentInput = '';
-      } else if (key === 'Enter') {
-        if (currentInput.length === 4) checkCode();
-      } else if (currentInput.length < 4 && !isNaN(key)) {
+      }else if(key === 'Enter'){
+        if(currentInput.length === 4) checkCode();
+      }else if(currentInput.length < 4 && !isNaN(key)){
         currentInput += key;
       }
       updateDisplay();
     }
 
-    function showImage(index) {
+    function showImage(index){
       images[currentImageIndex].classList.remove('active');
       currentImageIndex = index;
       images[currentImageIndex].classList.add('active');
     }
 
-    // Dokunmatik swipe
+    // Swipe
     let touchStartX=0, touchEndX=0;
-    document.querySelector('.image-gallery').addEventListener('touchstart', e => {
+    document.querySelector('.image-gallery').addEventListener('touchstart',e=>{
       touchStartX = e.changedTouches[0].screenX;
     });
-    document.querySelector('.image-gallery').addEventListener('touchend', e => {
+    document.querySelector('.image-gallery').addEventListener('touchend',e=>{
       touchEndX = e.changedTouches[0].screenX;
       const diff = touchStartX - touchEndX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0 && currentImageIndex < images.length-1) showImage(currentImageIndex+1);
-        else if (diff < 0 && currentImageIndex > 0) showImage(currentImageIndex-1);
+      if(Math.abs(diff) > 50){
+        if(diff > 0 && currentImageIndex < images.length-1)
+          showImage(currentImageIndex+1);
+        else if(diff < 0 && currentImageIndex > 0)
+          showImage(currentImageIndex-1);
       }
     });
 
-    document.querySelectorAll('.key').forEach(key => {
-      key.addEventListener('click', () => handleKeyPress(key.textContent));
+    // Tuşlar
+    document.querySelectorAll('.key').forEach(key=>{
+      key.addEventListener('click',()=>handleKeyPress(key.textContent));
     });
-    document.querySelector('.nav-button.prev').addEventListener('click', () => {
-      if (currentImageIndex>0) showImage(currentImageIndex-1);
+
+    // Navigasyon
+    document.querySelector('.nav-button.prev').addEventListener('click',()=>{
+      if(currentImageIndex>0) showImage(currentImageIndex-1);
     });
-    document.querySelector('.nav-button.next').addEventListener('click', () => {
-      if (currentImageIndex<images.length-1) showImage(currentImageIndex+1);
+    document.querySelector('.nav-button.next').addEventListener('click',()=>{
+      if(currentImageIndex<images.length-1) showImage(currentImageIndex+1);
     });
-    images.forEach(container => {
+
+    // Lightbox
+    images.forEach(container=>{
       const img = container.querySelector('img');
-      img.addEventListener('click', () => {
+      img.addEventListener('click',()=>{
         fullscreenImage.src = img.src;
         fullscreenContainer.classList.add('active');
       });
     });
-    fullscreenContainer.addEventListener('click', () => {
+    fullscreenContainer.addEventListener('click',()=>{
       fullscreenContainer.classList.remove('active');
       fullscreenImage.src = '';
     });
+
+    /* Eski iOS/Safari için nihai fren: .key'e gelen double‑click'i pasifleştir */
+    document.addEventListener('dblclick',e=>{
+      if(e.target.closest('.key')) e.preventDefault();
+    },{passive:false});
   </script>
 </body>
 </html>
